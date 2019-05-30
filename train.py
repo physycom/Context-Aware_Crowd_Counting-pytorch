@@ -21,7 +21,7 @@ if __name__=="__main__":
     test_dmap_root=   data_prefixdir + 'ShanghaiTech/part_A_final/test_data/ground_truth'
     gpu_or_cpu='cuda' # use cuda or cpu
     lr                = 1e-7
-    batch_size        = 1
+    batch_size        = 1 # 1 for various size dataset, 32 for fixed size dataset
     momentum          = 0.95
     epochs            = 500 #20000
     steps             = [-1,1,100,150]
@@ -35,10 +35,8 @@ if __name__=="__main__":
     torch.cuda.manual_seed(seed)
     model=CANNet().to(device)
     criterion=nn.MSELoss(size_average=False).to(device)
-    optimizer=torch.optim.SGD(model.parameters(),lr,
-                              momentum=momentum,
-                              weight_decay=0)
-#    optimizer=torch.optim.Adam(model.parameters(),lr)
+    optimizer=torch.optim.SGD(model.parameters(),lr,momentum=momentum,weight_decay=0) # various size dataset
+#    optimizer=torch.optim.Adam(model.parameters(),lr)                                # fixed size dataset
     train_dataset=CrowdDataset(train_image_root,train_dmap_root,gt_downsample=8,phase='train')
     train_loader=torch.utils.data.DataLoader(train_dataset,batch_size=1,shuffle=True)
     test_dataset=CrowdDataset(test_image_root,test_dmap_root,gt_downsample=8,phase='test')
@@ -70,7 +68,6 @@ if __name__=="__main__":
 #        print("epoch:",epoch,"loss:",epoch_loss/len(dataloader))
         epoch_list.append(epoch)
         train_loss_list.append(epoch_loss/len(train_loader))
-        torch.save(model.state_dict(),'./checkpoints/epoch_'+str(epoch)+".pth")
 
         # testing phase
         model.eval()
@@ -83,8 +80,10 @@ if __name__=="__main__":
             mae+=abs(et_dmap.data.sum()-gt_dmap.data.sum()).item()
             del img,gt_dmap,et_dmap
         if mae/len(test_loader)<min_mae:
+            torch.save(model.state_dict(),'./checkpoints/epoch_'+str(epoch)+".pth")
             min_mae=mae/len(test_loader)
             min_epoch=epoch
+
         test_error_list.append(mae/len(test_loader))
         print("epoch:"+str(epoch)+" error:"+str(mae/len(test_loader))+" min_mae:"+str(min_mae)+" min_epoch:"+str(min_epoch))
         vis.line(win=1,X=epoch_list, Y=train_loss_list, opts=dict(title='train_loss'))

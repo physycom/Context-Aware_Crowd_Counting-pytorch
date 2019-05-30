@@ -28,10 +28,8 @@ class CANNet(nn.Module):
                 temp_key=list(self.frontend.state_dict().items())[i][0]
                 fsd[temp_key]=list(mod.state_dict().items())[i][1]
             self.frontend.load_state_dict(fsd)
-
     def forward(self,x):
         fv = self.frontend(x)
-        print(fv.shape)
         #S=1
         ave1=nn.functional.adaptive_avg_pool2d(fv,(1,1))
         ave1=self.conv1_1(ave1)
