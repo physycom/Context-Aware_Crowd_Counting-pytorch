@@ -10,23 +10,26 @@ from tqdm import tqdm as tqdm
 from cannet import CANNet
 from my_dataset import CrowdDataset
 
+import time
+
 if __name__=="__main__":
     # configuration
-    train_image_root='./data/Shanghai_part_A/train_data/images'
-    train_dmap_root='./data/Shanghai_part_A/train_data/ground_truth'
-    test_image_root='./data/Shanghai_part_A/test_data/images'
-    test_dmap_root='./data/Shanghai_part_A/test_data/ground_truth'
+    data_prefixdir = 'E:/Alessandro/'
+    train_image_root= data_prefixdir + 'ShanghaiTech/part_A_final/train_data/images'
+    train_dmap_root=  data_prefixdir + 'ShanghaiTech/part_A_final/train_data/ground_truth'
+    test_image_root=  data_prefixdir + 'ShanghaiTech/part_A_final/test_data/images'
+    test_dmap_root=   data_prefixdir + 'ShanghaiTech/part_A_final/test_data/ground_truth'
     gpu_or_cpu='cuda' # use cuda or cpu
     lr                = 1e-7
     batch_size        = 1
     momentum          = 0.95
-    epochs            = 20000
+    epochs            = 500 #20000
     steps             = [-1,1,100,150]
     scales            = [1,1,1,1]
     workers           = 4
     seed              = time.time()
-    print_freq        = 30 
-    
+    print_freq        = 30
+
     vis=visdom.Visdom()
     device=torch.device(gpu_or_cpu)
     torch.cuda.manual_seed(seed)
@@ -40,7 +43,7 @@ if __name__=="__main__":
     train_loader=torch.utils.data.DataLoader(train_dataset,batch_size=1,shuffle=True)
     test_dataset=CrowdDataset(test_image_root,test_dmap_root,gt_downsample=8,phase='test')
     test_loader=torch.utils.data.DataLoader(test_dataset,batch_size=1,shuffle=False)
-    
+
     if not os.path.exists('./checkpoints'):
         os.mkdir('./checkpoints')
     min_mae=10000
@@ -49,6 +52,7 @@ if __name__=="__main__":
     epoch_list=[]
     test_error_list=[]
     for epoch in range(0,epochs):
+        print("***************",time.ctime())
         # training phase
         model.train()
         epoch_loss=0
@@ -67,7 +71,7 @@ if __name__=="__main__":
         epoch_list.append(epoch)
         train_loss_list.append(epoch_loss/len(train_loader))
         torch.save(model.state_dict(),'./checkpoints/epoch_'+str(epoch)+".pth")
-    
+
         # testing phase
         model.eval()
         mae=0
@@ -95,30 +99,6 @@ if __name__=="__main__":
         et_dmap=model(img)
         et_dmap=et_dmap.squeeze(0).detach().cpu().numpy()
         vis.image(win=5,img=et_dmap/(et_dmap.max())*255,opts=dict(title='et_dmap('+str(et_dmap.sum())+')'))
-    
+
     import time
     print(time.strftime('%Y.%m.%d %H:%M:%S',time.localtime(time.time())))
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    

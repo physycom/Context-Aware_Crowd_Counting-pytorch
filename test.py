@@ -56,13 +56,14 @@ def estimate_density_map(img_root,gt_dmap_root,model_param_path,index):
             et_dmap=et_dmap.squeeze(0).squeeze(0).cpu().numpy()
             print(et_dmap.shape)
             plt.imshow(et_dmap,cmap=CM.jet)
+            plt.show()
             break
 
 
 if __name__=="__main__":
     torch.backends.cudnn.enabled=False
-    img_root='./data/Shanghai_part_A/test_data/images'
-    gt_dmap_root='./data/Shanghai_part_A/test_data/ground_truth'
-    model_param_path='./checkpoints/epoch_124.pth'
-    cal_mae(img_root,gt_dmap_root,model_param_path)
-    # estimate_density_map(img_root,gt_dmap_root,model_param_path,3) 
+    img_root='./ShanghaiTech/part_A_final/test_data/images'
+    gt_dmap_root='./ShanghaiTech/part_A_final/test_data/ground_truth'
+    model_param_path='./checkpoints/epoch_499.pth'
+    # cal_mae(img_root,gt_dmap_root,model_param_path)
+    estimate_density_map(img_root,gt_dmap_root,model_param_path,3)
