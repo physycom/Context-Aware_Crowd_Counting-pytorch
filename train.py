@@ -12,18 +12,22 @@ from my_dataset import CrowdDataset
 
 import time
 
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("-f", "--data-dir",     help="dataset folder (no trailing /)",     required = True)
+parser.add_argument("-o", "--optimizer",    help="optimizer type to use. adam or sgd", required = True)
+args = parser.parse_args()
+
 if __name__=="__main__":
     # configuration
-    data_prefixdir = 'E:/Alessandro/'
-    train_image_root= data_prefixdir + 'ShanghaiTech/part_A_final/train_data/images'
-    train_dmap_root=  data_prefixdir + 'ShanghaiTech/part_A_final/train_data/ground_truth'
-    test_image_root=  data_prefixdir + 'ShanghaiTech/part_A_final/test_data/images'
-    test_dmap_root=   data_prefixdir + 'ShanghaiTech/part_A_final/test_data/ground_truth'
+    train_image_root= args.data_dir + '/train_data/images'
+    train_dmap_root=  args.data_dir + '/train_data/ground_truth'
+    test_image_root=  args.data_dir + '/test_data/images'
+    test_dmap_root=   args.data_dir + '/test_data/ground_truth'
     gpu_or_cpu='cuda' # use cuda or cpu
     lr                = 1e-7
-    batch_size        = 1 # 1 for various size dataset, 32 for fixed size dataset
     momentum          = 0.95
-    epochs            = 500 #20000
+    epochs            = 600 #20000
     steps             = [-1,1,100,150]
     scales            = [1,1,1,1]
     workers           = 4
@@ -35,12 +39,17 @@ if __name__=="__main__":
     torch.cuda.manual_seed(seed)
     model=CANNet().to(device)
     criterion=nn.MSELoss(size_average=False).to(device)
-    optimizer=torch.optim.SGD(model.parameters(),lr,momentum=momentum,weight_decay=0) # various size dataset
-#    optimizer=torch.optim.Adam(model.parameters(),lr)                                # fixed size dataset
+    if (args.optimizer == 'adam'):
+        optimizer=torch.optim.Adam(model.parameters(),lr)                                 # fixed size dataset
+        batch_size=32
+    else: # if(arg.optimizer == 'sgd'):
+        optimizer=torch.optim.SGD(model.parameters(),lr,momentum=momentum,weight_decay=0) # various size dataset
+        batch_size=1
+
     train_dataset=CrowdDataset(train_image_root,train_dmap_root,gt_downsample=8,phase='train')
-    train_loader=torch.utils.data.DataLoader(train_dataset,batch_size=1,shuffle=True)
+    train_loader=torch.utils.data.DataLoader(train_dataset,batch_size=batch_size,shuffle=True)
     test_dataset=CrowdDataset(test_image_root,test_dmap_root,gt_downsample=8,phase='test')
-    test_loader=torch.utils.data.DataLoader(test_dataset,batch_size=1,shuffle=False)
+    test_loader=torch.utils.data.DataLoader(test_dataset,batch_size=batch_size,shuffle=False)
 
     if not os.path.exists('./checkpoints'):
         os.mkdir('./checkpoints')
@@ -80,7 +89,7 @@ if __name__=="__main__":
             mae+=abs(et_dmap.data.sum()-gt_dmap.data.sum()).item()
             del img,gt_dmap,et_dmap
         if mae/len(test_loader)<min_mae:
-            torch.save(model.state_dict(),'./checkpoints/epoch_'+str(epoch)+".pth")
+            torch.save(model.state_dict(),'./checkpoints/'+ str(arg.data_dir.split('/')[-1])+'epoch_'+str(epoch)+".pth")
             min_mae=mae/len(test_loader)
             min_epoch=epoch
 
