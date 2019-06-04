@@ -41,7 +41,7 @@ if __name__=="__main__":
     criterion=nn.MSELoss(size_average=False).to(device)
     if (args.optimizer == 'adam'):
         optimizer=torch.optim.Adam(model.parameters(),lr)                                 # fixed size dataset
-        batch_size=32
+        batch_size=4
     else: # if(arg.optimizer == 'sgd'):
         optimizer=torch.optim.SGD(model.parameters(),lr,momentum=momentum,weight_decay=0) # various size dataset
         batch_size=1
@@ -89,7 +89,7 @@ if __name__=="__main__":
             mae+=abs(et_dmap.data.sum()-gt_dmap.data.sum()).item()
             del img,gt_dmap,et_dmap
         if mae/len(test_loader)<min_mae:
-            torch.save(model.state_dict(),'./checkpoints/'+ str(arg.data_dir.split('/')[-1])+'epoch_'+str(epoch)+".pth")
+            torch.save(model.state_dict(),'./checkpoints/'+ str(args.data_dir.split('/')[-1])+'_epoch_'+str(epoch)+".pth")
             min_mae=mae/len(test_loader)
             min_epoch=epoch
 

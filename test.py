@@ -18,7 +18,7 @@ def cal_mae(img_root,gt_dmap_root,model_param_path):
     model=CANNet()
     model.load_state_dict(torch.load(model_param_path))
     model.to(device)
-    dataset=CrowdDataset(img_root,gt_dmap_root,8,,phase='test')
+    dataset=CrowdDataset(img_root,gt_dmap_root,8,phase='test')
     dataloader=torch.utils.data.DataLoader(dataset,batch_size=1,shuffle=False)
     model.eval()
     mae=0
@@ -44,7 +44,7 @@ def estimate_density_map(img_root,gt_dmap_root,model_param_path,index):
     device=torch.device("cuda")
     model=CANNet().to(device)
     model.load_state_dict(torch.load(model_param_path))
-    dataset=CrowdDataset(img_root,gt_dmap_root,8,,phase='test')
+    dataset=CrowdDataset(img_root,gt_dmap_root,8,phase='test')
     dataloader=torch.utils.data.DataLoader(dataset,batch_size=1,shuffle=False)
     model.eval()
     for i,(img,gt_dmap) in enumerate(dataloader):
@@ -62,8 +62,8 @@ def estimate_density_map(img_root,gt_dmap_root,model_param_path,index):
 
 if __name__=="__main__":
     torch.backends.cudnn.enabled=False
-    img_root='./ShanghaiTech/part_A_final/test_data/images'
-    gt_dmap_root='./ShanghaiTech/part_A_final/test_data/ground_truth'
-    model_param_path='./checkpoints/epoch_499.pth'
-    # cal_mae(img_root,gt_dmap_root,model_param_path)
-    estimate_density_map(img_root,gt_dmap_root,model_param_path,3)
+    img_root='E:\\Alessandro\\ShanghaiTech\\part_B_final\\test_data\\images'
+    gt_dmap_root='E:\\Alessandro\\ShanghaiTech\\part_B_final\\test_data\\ground_truth'
+    model_param_path='./checkpoints/part_A_final_epoch_588.pth'
+    cal_mae(img_root,gt_dmap_root,model_param_path)
+    # estimate_density_map(img_root,gt_dmap_root,model_param_path,3)

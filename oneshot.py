@@ -16,7 +16,7 @@ dataset_prefdir = 'E:/Alessandro/'
 img_root= dataset_prefdir + 'ShanghaiTech/part_A_final/test_data/images'
 gt_dmap_root= dataset_prefdir + 'ShanghaiTech/part_A_final/test_data/ground_truth'
 
-model_param_path='./checkpoints/epoch_462.pth'
+model_param_path='./checkpoints/part_A_final_epoch_588.pth'
 
 device=torch.device("cuda")
 model=CANNet().to(device)
@@ -27,7 +27,7 @@ model.load_state_dict(torch.load(model_param_path))
 
 model.eval()
 
-img_name = 'IMG_101'
+img_name = 'IMG_100'
 img_path = 'E:\\Alessandro\\ShanghaiTech\\part_A_final\\test_data\\images\\' + img_name + '.jpg'
 gt_path = 'E:\\Alessandro\\ShanghaiTech\\part_A_final\\test_data\\ground_truth\\' + img_name + '.npy'
 
