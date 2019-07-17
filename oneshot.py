@@ -6,19 +6,18 @@ import matplotlib.cm as CM
 import numpy as np
 
 from cannet import CANNet
-from my_dataset import CrowdDataset
 
 from PIL import Image
 
 torch.backends.cudnn.enabled=True
 
-dataset_prefdir = 'E:/Alessandro/'
-img_root= dataset_prefdir + 'ShanghaiTech/part_A_final/test_data/images'
-gt_dmap_root= dataset_prefdir + 'ShanghaiTech/part_A_final/test_data/ground_truth'
+dataset_prefdir = 'D:/Alex/'
+img_root= dataset_prefdir + 'venice/test_data/images/'
+gt_dmap_root= dataset_prefdir + 'venice/test_data/ground_truth/'
 
-model_param_path='./checkpoints/part_A_final_epoch_588.pth'
+model_param_path='./checkpoints/venice_epoch_991.pth'
 
-device=torch.device("cuda")
+device=torch.device("cpu")
 model=CANNet().to(device)
 model.load_state_dict(torch.load(model_param_path))
 
@@ -26,17 +25,21 @@ model.load_state_dict(torch.load(model_param_path))
 #dataloader=torch.utils.data.DataLoader(dataset,batch_size=1,shuffle=False)
 
 model.eval()
+torch.no_grad()
 
-img_name = 'IMG_100'
-img_path = 'E:\\Alessandro\\ShanghaiTech\\part_A_final\\test_data\\images\\' + img_name + '.jpg'
-gt_path = 'E:\\Alessandro\\ShanghaiTech\\part_A_final\\test_data\\ground_truth\\' + img_name + '.npy'
+img_name = '4895_000060'
+img_path = img_root + img_name + '.jpg'
+gt_path = gt_dmap_root + img_name + '.npy'
 
 gt_dmap = np.load(gt_path)
 
 img_orig = Image.open(img_path)
-img = torchvision.transforms.ToTensor()(img_orig).unsqueeze(0)
+img = torchvision.transforms.ToTensor()(img_orig)
+img = torchvision.transforms.functional.normalize(img,
+                                                  mean=[0.485, 0.456, 0.406],
+                                                  std=[0.229, 0.224, 0.225])
 
-img=img.to(device)
+img=img.unsqueeze(0).to(device)
 #gt_dmap=gt_dmap.to(device)
 
 # forward propagation
@@ -45,11 +48,13 @@ et_dmap=et_dmap.squeeze(0).squeeze(0).cpu().numpy()
 print(et_dmap.shape)
 
 
-fig, ax = plt.subplots(1,2)
+fig, ax = plt.subplots(1,3, figsize=(15,4))
 et = np.round(et_dmap.sum())
 gt = np.round(gt_dmap.sum())
 er = np.abs(et-gt)/gt
-fig.suptitle("Total stronzi ET: {} GT: {} Err: {}".format(et,gt,er))
+fig.suptitle("Total people ET: {} GT: {} Err: {}".format(et,gt,er))
 ax[0].imshow(img_orig)
-ax[1].imshow(et_dmap,cmap=CM.jet)
+ax[1].imshow(gt_dmap,cmap=CM.jet)
+ax[2].imshow(et_dmap,cmap=CM.jet)
+plt.tight_layout()
 plt.show()
