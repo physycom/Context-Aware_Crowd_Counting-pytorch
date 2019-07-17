@@ -54,8 +54,10 @@ class CrowdDataset(Dataset):
             gt_dmap=gt_dmap[np.newaxis,:,:]*self.gt_downsample*self.gt_downsample
 
             img_tensor=torch.tensor(img,dtype=torch.float)
+            # -------- to change depending on dataset!!!! ----------------------
             img_tensor=transforms.functional.normalize(img_tensor,mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
+            # ------------------------------------------------------------------
             gt_dmap_tensor=torch.tensor(gt_dmap,dtype=torch.float)
 
         return img_tensor,gt_dmap_tensor

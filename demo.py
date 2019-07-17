@@ -24,16 +24,16 @@ if __name__ == '__main__':
     # setup the model
     if args.device == "cpu":
         device=torch.device("cpu")
-    else:
+    elif args.device == "gpu":   
         device = torch.device("cuda")
         torch.backends.cudnn.enabled = True # use cudnn?
+    else:
+        raise Exception("Unknown device. Use \"cpu\" or \"gpu\".")
     model = CANNet().to(device)
     model.load_state_dict(torch.load(args.model))
     model.eval()
     torch.no_grad()
     
-    
-
     # open the video stream / file
     cap = cv2.VideoCapture(args.video)
     while(cap.isOpened()):
@@ -67,5 +67,3 @@ if __name__ == '__main__':
             break
     cap.release()
     cv2.destroyAllWindows()
-
-
