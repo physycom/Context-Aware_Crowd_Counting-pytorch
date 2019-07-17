@@ -42,7 +42,9 @@ if __name__ == '__main__':
         
         # convert to pytorch tensor and normalize
         tensor = torchvision.transforms.ToTensor()(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+        # ---------- to change after new norm training ------------------------
         tensor = torchvision.transforms.functional.normalize(tensor, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        # ---------------------------------------------------------------------
         tensor = tensor.unsqueeze(0).to(device)
         t2 = time.clock()
         # forward propagation

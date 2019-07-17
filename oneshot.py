@@ -38,9 +38,9 @@ else:
 img_path = img_root + img_name + '.jpg'
 gt_path = gt_dmap_root + img_name + '.npy'
 
-if args.device == "cpu":
+if args.dev == "cpu":
     device=torch.device("cpu")
-elif args.device == "gpu":   
+elif args.dev == "gpu":   
     device = torch.device("cuda")
     torch.backends.cudnn.enabled = True # use cudnn?
 else:
@@ -67,10 +67,10 @@ et_dmap=model(img).detach()
 et_dmap=et_dmap.squeeze(0).squeeze(0).cpu().numpy()
 
 fig, ax = plt.subplots(1,3, figsize=(15,4))
-et = np.round(et_dmap.sum())
-gt = np.round(gt_dmap.sum())
+et = et_dmap.sum()
+gt = gt_dmap.sum()
 er = np.abs(et-gt)/gt
-fig.suptitle("Total people ET: {} GT: {} Err: {}".format(et,gt, round(er,3)))
+fig.suptitle("Total people ET: {:.0f} GT: {:.0f} Err: {:.3f}".format(et,gt, er))
 ax[0].imshow(img_orig)
 ax[1].imshow(gt_dmap,cmap=CM.hot)
 ax[2].imshow(et_dmap,cmap=CM.hot)
