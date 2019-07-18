@@ -10,9 +10,6 @@ import argparse
 
 from cannet import CANNet
 
-#debug purpose
-import time
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", default="C:/Users/alex/Desktop/scripts/cacc-physycom/checkpoints/venice_epoch_991.pth", type=str, help="Weights file to use")
@@ -37,7 +34,6 @@ if __name__ == '__main__':
     # open the video stream / file
     cap = cv2.VideoCapture(args.video)
     while(cap.isOpened()):
-        t1 = time.clock()
         _, frame = cap.read()
         
         # convert to pytorch tensor and normalize
@@ -46,10 +42,8 @@ if __name__ == '__main__':
         tensor = torchvision.transforms.functional.normalize(tensor, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         # ---------------------------------------------------------------------
         tensor = tensor.unsqueeze(0).to(device)
-        t2 = time.clock()
         # forward propagation
         ed_map = model(tensor).detach()
-        t3 = time.clock()
         ed_map = ed_map.squeeze(0).squeeze(0).cpu().numpy()
         ed_map*=(ed_map>0) # sets to 0 the negative values
         # converts frame to grayscale and density map to color map
@@ -61,9 +55,6 @@ if __name__ == '__main__':
         # write total people count on image and show results
         cv2.putText(res, str(int(ed_map.sum()+0.5)), (10, frame.shape[0]-10), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
         cv2.imshow("Density map", res)
-        t4 = time.clock()
-        print("forward prop:" + str(t3-t2))
-        print("whole frame: " + str(t4-t1))
         # wait for escape key
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
